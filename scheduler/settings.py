@@ -1,0 +1,13 @@
+# Global settings
+SCHEDULE_INTERVAL = 15
+INTERVALS_PER_CYCLE = 240
+MAX_URLS_PER_INTERVAL = 500
+
+DEFAULT_LIMIT = 7 * 24 * 3600
+
+# Logging
+LOGFILE = 'log/schedule.log'
+
+# Redis
+REDIS_HOST = '192.168.2.228'
+REDIS_PORT = 6381
