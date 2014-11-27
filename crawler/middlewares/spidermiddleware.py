@@ -7,6 +7,7 @@ from scrapy.http import Request
 
 from crawler.items import CrawlerItem
 
+
 class FlowMiddleware(object):
     def process_spider_output(self, response, result, spider):
         flowid = response.request.meta['flow']
@@ -15,8 +16,8 @@ class FlowMiddleware(object):
                 req.meta['flow'] = flowid
             yield req
 
+
 class SpiderMiddleware(object):
-    
     def __init__(self, settings):
         host = settings.get("REDIS_HOST")
         port = settings.get("REDIS_PORT")
@@ -45,7 +46,7 @@ class SpiderMiddleware(object):
                 }
                 self.rd.zadd("log:spider:out", json.dumps(data), time.time())
             yield rs
-        
+
     def process_spider_exception(self, response, exception, spider):
         data = {
             "url": response.url, "domain": self.settings.get("DOMAIN"),

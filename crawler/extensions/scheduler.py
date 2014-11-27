@@ -1,13 +1,13 @@
-import os
 import json
 
 from scrapy.utils.reqser import request_to_dict, request_from_dict
 from scrapy.utils.misc import load_object
-from scrapy import log
+
 
 class Scheduler(object):
     """Redis-based scheduler"""
-    def __init__(self, dupefilter, domainclass=None, flowclass=None, stats=None, settings=None):
+    def __init__(self, dupefilter, domainclass=None,
+                 flowclass=None, stats=None, settings=None):
         self.df = dupefilter
         self.domainclass = domainclass
         self.flowclass = flowclass
@@ -22,13 +22,14 @@ class Scheduler(object):
         domainclass = load_object(settings['SCHEDULER_DOMAIN_CLASS'])
         flowclass = load_object(settings['SCHEDULER_FLOW_CLASS'])
         return cls(dupefilter, domainclass, flowclass, crawler.stats, settings)
- 
+
     def has_pending_requests(self):
         return len(self) > 0
 
     def open(self, spider):
         self.spider = spider
-        self.domainmodel = self.domainclass.from_settings(self.settings["DOMAIN"], self.settings)
+        self.domainmodel = self.domainclass.from_settings(
+            self.settings["DOMAIN"], self.settings)
         return self.df.open()
 
     def close(self, reason):
@@ -39,7 +40,8 @@ class Scheduler(object):
             self.df.log(request, self.spider)
             return
 
-        self.flowmodel = self.flowclass.from_settings(request.meta["flow"], self.settings)
+        self.flowmodel = self.flowclass.from_settings(
+            request.meta["flow"], self.settings)
         self._eqpush(request)
         self.stats.inc_value('scheduler/enqueued/redis', spider=self.spider)
         self.stats.inc_value('scheduler/enqueued', spider=self.spider)
@@ -52,7 +54,7 @@ class Scheduler(object):
         return request
 
     def __len__(self):
-        return self.domainmodel.q_len()# + sum(flow.q_len() for flow in self.domainmodel.flows())
+        return self.domainmodel.q_len()
 
     def _eqpush(self, request):
         req = json.dumps(request_to_dict(request, self.spider))

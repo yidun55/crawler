@@ -1,5 +1,7 @@
+# coding:utf-8
 from scrapy import signals
 from scrapy.exceptions import DontCloseSpider
+
 
 class SchedulerExtension(object):
     def __init__(self, settings):
@@ -17,4 +19,3 @@ class SchedulerExtension(object):
     def spider_idle(self, spider):
         if spider.name == "main":
             raise DontCloseSpider
-

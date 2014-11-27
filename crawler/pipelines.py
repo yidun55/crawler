@@ -1,12 +1,11 @@
-#coding: utf-8
-import time
+# coding: utf-8
+import datetime
 import json
-from hashlib import md5
 
+#import pyreBloom
 from scrapy.exceptions import DropItem
 
 import redis
-from scrapy import log
 
 
 class CrawlerPipeline(object):
@@ -14,12 +13,9 @@ class CrawlerPipeline(object):
         self.settings = settings
         host = settings.get("REDIS_HOST")
         port = settings.get("REDIS_PORT")
-        db = settings.get("LOG_REDIS_DB")
-        # Fingerprint DB
-        fp_db = settings.get("FP_REDIS_DB")
+        # BloomFilter
+        #self.urls_seen = pyreBloom.pyreBloom("bloomfilter", 100000000, 0.001)
         slice_db = settings.get("SLICE_REDIS_DB")
-        self.log_rd = redis.Redis(host, port, db)
-        self.fp_rd = redis.Redis(host, port, fp_db)
         self.slice_rd = redis.Redis(host, port, slice_db)
 
     @classmethod
@@ -39,14 +35,10 @@ class CrawlerPipeline(object):
                 raise DropItem("Further slice item.")
 
         # create time/updated time
-        full_item["created"] = int(time.time() * 1000)
+        full_item["created"] = datetime.datetime.now()
         full_item["updated"] = full_item["created"]
 
         # save fingerprint to redis
-        if spider.name == "main":
-            m = md5(full_item["url"]).hexdigest()
-            c = md5(json.dumps(dict(full_item))).hexdigest()
-            self.fp_rd.set(m, c)
-            self.fp_rd.expire(m, self.settings.get("FP_EXPIRE"))
+        #self.urls_seen.add(full_item["url"])
 
         return full_item

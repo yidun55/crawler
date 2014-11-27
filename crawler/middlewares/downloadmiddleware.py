@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 import time
 import json
 
@@ -6,6 +6,7 @@ import redis
 from scrapy.http import Response, HtmlResponse
 from scrapy.exceptions import IgnoreRequest
 from twisted.internet.error import TimeoutError
+
 
 class DownloadMiddleware(object):
     """
@@ -50,7 +51,7 @@ class DownloadMiddleware(object):
         else:
             self.rd.zadd("log:httpresponse", json.dumps(data), time.time())
             return response
-            
+
     def process_exception(self, request, exception, spider):
         """定义下载超时的HTTP CODE为900，然后转给process_response去处理"""
         data = {
@@ -66,6 +67,7 @@ class DownloadMiddleware(object):
                 data["msg"] = "unknow"
             self.rd.zadd("log:httperror:unknow", json.dumps(data), time.time())
 
+
 class ResponseTransfer(object):
     """
     由于某些网站返回的Header没有指定content-type，所以scrapy默认的response为Response类型
@@ -78,4 +80,3 @@ class ResponseTransfer(object):
             return html_response
 
         return response
-        

@@ -27,12 +27,12 @@ SPIDER_MIDDLEWARES = {
     "crawler.middlewares.spidermiddleware.SpiderMiddleware": 544
 }
 DOWNLOADER_MIDDLEWARES = {
-    "crawler.middlewares.downloadmiddleware.ResponseTransfer": 543, 
+    "crawler.middlewares.downloadmiddleware.ResponseTransfer": 543,
     "crawler.middlewares.downloadmiddleware.DownloadMiddleware": 544
 }
 EXTENSIONS = {
     "crawler.extensions.scheduler_ext.SchedulerExtension": 500,
-    "crawler.extensions.pushworker.PushWorkerExtension": 543
+    #"crawler.extensions.pushworker.PushWorkerExtension": 543
 }
 SCHEDULER = "crawler.extensions.scheduler.Scheduler"
 
@@ -42,25 +42,23 @@ FP_EXPIRE = 90 * 24 * 3600
 FURTHER_REQUEST_MODULE = "crawler.spiders.further_request"
 
 # Redis config
-REDIS_HOST = '192.168.2.228'
+REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6381
 MAIN_REDIS_DB = 0
 LOG_REDIS_DB = 15
-# Fingerprint DB
-FP_REDIS_DB = 14
 SLICE_REDIS_DB = 13
 
 # Mysql config
-MYSQL_HOST = '192.168.2.228'
+MYSQL_HOST = '127.0.0.1'
 MYSQL_PORT = 3306
 MYSQL_DB = 'spider'
-MYSQL_USER = 'crawler'
-MYSQL_PASS = 'crawler'
+MYSQL_USER = 'car'
+MYSQL_PASS = 'car123'
 
 # Mongodb config
-MONGO_SERVER = '192.168.2.228'
-MONGO_PORT = 2281
-MONGO_DB = 'dcrawler'
+MONGO_SERVER = '127.0.0.1'
+MONGO_PORT = 27017
+MONGO_DB = 'car'
 MONGO_COLL = 'car_info'
 
 # RabbitMQ config
