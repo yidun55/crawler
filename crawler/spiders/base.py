@@ -1,9 +1,9 @@
-#coding: utf-8
+# coding: utf-8
+import re
 from hashlib import md5
 from collections import defaultdict
 
 import redis
-from scrapy import log
 from scrapy.conf import settings
 from scrapy.http import Request
 from scrapy.selector import HtmlXPathSelector
@@ -15,6 +15,7 @@ from crawler.items import CrawlerItem
 from crawler.spiders import further_request
 from crawler.lib.models import Domain, Flow, Rule
 from crawler.lib.selector import JsonPathSelector
+
 
 class SuperSpider(CrawlSpider):
     name = "main"
@@ -122,7 +123,8 @@ class SuperSpider(CrawlSpider):
                     yield frequest
                     seq += 1
 
-        if seq == 1: seq = 0
+        if seq == 1:
+            seq = 0
         item["_max_seq"] = max_seq
         item["_seq"] = seq
 

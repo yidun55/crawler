@@ -1,17 +1,18 @@
-#coding:utf-8
+# coding:utf-8
 from scrapy.item import Item, Field
+
 
 class CrawlerItem(Item):
     id = Field()
     created = Field()
     updated = Field()
-    
+
     domain = Field()
     site = Field()
     flow = Field()
     version = Field()
     url = Field()
-    
+
     car_title = Field()
     car_brand = Field()
     car_series = Field()
