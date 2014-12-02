@@ -6,7 +6,7 @@ import redis
 import pymongo
 from scrapy import signals
 
-from crawler.lib.mq import MessageClient
+#from crawler.lib.mq import MessageClient
 
 
 class PushWorkerExtension(object):
@@ -17,7 +17,7 @@ class PushWorkerExtension(object):
         port = settings.get("REDIS_PORT")
         db = settings.get("LOG_REDIS_DB")
         self.rd = redis.Redis(host, port, db)
-        self.mclient = MessageClient.from_settings(settings)
+        #self.mclient = MessageClient.from_settings(settings)
 
         mongo_server = settings.get("MONGO_SERVER")
         mongo_port = settings.get("MONGO_PORT")
