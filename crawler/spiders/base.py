@@ -6,7 +6,6 @@ from collections import defaultdict
 import redis
 from scrapy.conf import settings
 from scrapy.http import Request
-from scrapy.selector import HtmlXPathSelector
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.utils.response import get_base_url
 from scrapy.utils.url import urljoin_rfc
@@ -41,41 +40,39 @@ class SuperSpider(CrawlSpider):
         return u
 
     def parse(self, response):
-        hxs = HtmlXPathSelector(response)
         flow = Flow(self.rd, response.meta["flow"])
 
-        page_no, = hxs.select(flow['pageno_xpath']).re(flow['pageno_regex'])
+        page_no, = response.xpath(flow['pageno_xpath']).re(flow['pageno_regex'])
         if int(page_no) != int(flow["page_limit"]):
-            next_pages = hxs.select(flow['list_page_xpath']).re(flow['list_page_regex'])
+            next_pages = response.xpath(flow['list_page_xpath']).re(flow['list_page_regex'])
             for u in next_pages:
                 yield Request(url=self._get_realurl(response, u),
                               meta=response.meta, callback=self.parse)
 
-        detail_pages = hxs.select(flow['detail_page_xpath']).re(flow['detail_page_regex'])
+        detail_pages = response.xpath(flow['detail_page_xpath']).re(flow['detail_page_regex'])
         for u in detail_pages:
             yield Request(url=self._get_realurl(response, u),
                           meta=response.meta, callback=self.parse_item)
 
-    def _load_raw(self, rule, hxs, jps, sep=''):
+    def _load_raw(self, rule, response, jps, sep=''):
         raw = ""
         if rule:
             p_type, rule_case = rule.split("##")
             if p_type == 'xpath':
                 xpath, regex = rule_case.split("#")
-                rs = hxs.select(xpath).re(regex)
+                rs = response.xpath(xpath).re(regex)
             elif p_type == 'jpath':
                 rs = jps.jpath(rule_case)
             elif p_type == 'value':
                 rs = [rule_case]
             elif p_type == 'regex':
-                rs = re.findall(rule_case, hxs.response.body)
+                rs = re.findall(rule_case, response.body)
 
             raw = sep.join(s.strip() for s in rs)
 
         return raw
 
     def parse_item(self, response):
-        hxs = HtmlXPathSelector(response)
         jps = JsonPathSelector(response)
 
         item = CrawlerItem()
@@ -104,7 +101,7 @@ class SuperSpider(CrawlSpider):
                 _, func, frule = rule.split("###")
                 frs[func][key] = frule
             else:
-                item[key] = self._load_raw(rule, hxs, jps, sep=sep)
+                item[key] = self._load_raw(rule, response, jps, sep=sep)
 
         seq = 1
         max_seq = len(frs) + 1
@@ -131,13 +128,12 @@ class SuperSpider(CrawlSpider):
         yield item
 
     def further_parse(self, response):
-        hxs = HtmlXPathSelector(response)
         jps = JsonPathSelector(response)
 
         item = CrawlerItem()
         cates = response.meta["fr"]
         for key, rule in cates.items():
-            item[key] = self._load_raw(rule, hxs, jps)
+            item[key] = self._load_raw(rule, response, jps)
 
         item["url"] = response.meta["url"]
         item["id"] = response.meta["id"]

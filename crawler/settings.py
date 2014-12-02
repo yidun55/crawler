@@ -35,17 +35,17 @@ FURTHER_REQUEST_MODULE = "crawler.spiders.further_request"
 
 # Redis config
 REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6381
+REDIS_PORT = 6379
 MAIN_REDIS_DB = 0
-LOG_REDIS_DB = 15
-SLICE_REDIS_DB = 13
+LOG_REDIS_DB = 1
+SLICE_REDIS_DB = 2
 
 # Mysql config
 MYSQL_HOST = '127.0.0.1'
 MYSQL_PORT = 3306
 MYSQL_DB = 'spider'
-MYSQL_USER = 'car'
-MYSQL_PASS = 'car123'
+MYSQL_USER = 'spider'
+MYSQL_PASS = 'huangwei'
 
 # Mongodb config
 MONGO_SERVER = '127.0.0.1'
