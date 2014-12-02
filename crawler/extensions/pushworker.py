@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 import time
 import json
 
@@ -7,6 +7,7 @@ import pymongo
 from scrapy import signals
 
 from crawler.lib.mq import MessageClient
+
 
 class PushWorkerExtension(object):
     """发送车源信息到数据处理队列，同时存入mongodb"""
@@ -38,12 +39,12 @@ class PushWorkerExtension(object):
             if x.startswith("_"):
                 del data[x]
 
-        self.mclient.send(data)
+        #self.mclient.send(data)
         ldata = {
             "url": item["url"], "domain": item["domain"],
             "flow": ""
         }
         self.rd.zadd("log:scraped", json.dumps(ldata), time.time())
 
-        #self.db.car_info.save(data)
+        self.db.car_info.save(data)
         spider.log("Available Item send to worker, %s" % str(item))
