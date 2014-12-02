@@ -24,7 +24,7 @@ DOWNLOADER_MIDDLEWARES = {
 }
 EXTENSIONS = {
     "crawler.extensions.scheduler_ext.SchedulerExtension": 500,
-    # "crawler.extensions.pushworker.PushWorkerExtension": 543
+    "crawler.extensions.pushworker.PushWorkerExtension": 543
 }
 SCHEDULER = "crawler.extensions.scheduler.Scheduler"
 
