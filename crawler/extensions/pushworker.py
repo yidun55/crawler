@@ -4,9 +4,8 @@ import json
 
 import redis
 import pymongo
+import pyreBloom
 from scrapy import signals
-
-#from crawler.lib.mq import MessageClient
 
 
 class PushWorkerExtension(object):
@@ -17,7 +16,8 @@ class PushWorkerExtension(object):
         port = settings.get("REDIS_PORT")
         db = settings.get("LOG_REDIS_DB")
         self.rd = redis.Redis(host, port, db)
-        #self.mclient = MessageClient.from_settings(settings)
+        self.urls_seen = pyreBloom.pyreBloom("bloomfilter", 100000000, 0.001,
+                                             host=host, port=port)
 
         mongo_server = settings.get("MONGO_SERVER")
         mongo_port = settings.get("MONGO_PORT")
@@ -39,7 +39,6 @@ class PushWorkerExtension(object):
             if x.startswith("_"):
                 del data[x]
 
-        #self.mclient.send(data)
         ldata = {
             "url": item["url"], "domain": item["domain"],
             "flow": ""
@@ -47,4 +46,5 @@ class PushWorkerExtension(object):
         self.rd.zadd("log:scraped", json.dumps(ldata), time.time())
 
         self.db.car_info.save(data)
+        self.urls_seen.add(data['url'])
         spider.log("Available Item send to worker, %s" % str(item))

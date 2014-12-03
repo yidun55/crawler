@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 import sys
 import time
 import json
@@ -9,6 +9,7 @@ import pika
 
 logging.basicConfig()
 logger = logging.getLogger("MQ")
+
 
 class MessageClient(object):
 
@@ -69,7 +70,7 @@ class MessageClient(object):
                     #                frame_max=131072
                 )
             )
-            
+
         self.recv_connection_available = True
 
     def __init_recvChannel(self):
@@ -96,7 +97,6 @@ class MessageClient(object):
                                                type=self.exchange_type,
                                                durable=True)
         self.send_channel_available = True
-
 
     def __check_connection(self):
         if not self.recv_connection or self.recv_connection.is_closed:
@@ -126,7 +126,6 @@ class MessageClient(object):
                     logger.fatal('Oh!, send channel is broken! exit !!!')
                     sys.exit()
 
-
     def __reconnect_sendChannel(self):
         if self.send_channel:
             self.send_channel.close()
@@ -137,26 +136,28 @@ class MessageClient(object):
         self.__init_Connection()
         self.__init_sendChannel()
 
-    def consuming(self,callbackfunc):
+    def consuming(self, callbackfunc):
         """consuming message useing callback function."""
         self.callbackfunction = callbackfunc
         if not self.receiving:
             return None
+
         def callback(ch, method, properties, body):
             data = json.loads(body, encoding='utf-8')
             try:
                 new_data = self.callbackfunction(data)
-            except Exception,e:
-                new_data=data
+            except Exception:
+                new_data = data
             if self.passing and new_data is not None:
                 self.send(new_data)
-            ch.basic_ack(delivery_tag = method.delivery_tag)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
         self.recv_channel.basic_qos(prefetch_count=20)
         self.recv_channel.basic_consume(callback,
                                         queue=self.in_queue_name)
         self.recv_channel.start_consuming()
 
-    def sendMsg(self,data,tryagain=False):
+    def sendMsg(self, data, tryagain=False):
         """send message using separate channel
         return True/False
         """
@@ -166,16 +167,13 @@ class MessageClient(object):
         __send_channel.exchange_declare(exchange=self.exchange_name,
                                         type=self.exchange_type,
                                         durable=True)
-        message = json.dumps(data,encoding='utf-8')
+        message = json.dumps(data, encoding='utf-8')
         try:
             __send_channel.basic_publish(
                 exchange=self.exchange_name,
                 routing_key=self.out_routing_key,
                 body=message,
-                properties=pika.BasicProperties(
-                    delivery_mode = 2, # make message persistent
-                )
-            )
+                properties=pika.BasicProperties(delivery_mode=2))
         except Exception as e:
             res = False
             logger.error(e)
@@ -183,10 +181,10 @@ class MessageClient(object):
         finally:
             __send_channel.close()
             logger.debug('Release channel.')
-            
+
         return res
 
-    def send(self,data,tryagain=False):
+    def send(self, data, tryagain=False):
         """
         send message
         return True/False
@@ -194,7 +192,7 @@ class MessageClient(object):
         res = True
         if not self.passing:
             return False
-        message = json.dumps(data,encoding='utf-8')
+        message = json.dumps(data, encoding='utf-8')
         self.__check_sendChannel()
         try:
             self.send_channel.basic_publish(
@@ -202,9 +200,7 @@ class MessageClient(object):
                 routing_key=self.out_routing_key,
                 body=message,
                 properties=pika.BasicProperties(
-                    delivery_mode = 2, # make message persistent
-                )
-            )
+                    delivery_mode=2))
         except Exception as e:
             res = False
             logger.error(e)

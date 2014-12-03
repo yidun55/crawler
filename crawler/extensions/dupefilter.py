@@ -27,9 +27,6 @@ class RFPDupeFilter(BaseDupeFilter):
     def request_seen(self, request):
         if request.url in self.urls_seen:
             return True
-        else:
-            if request.method == "GET":
-                self.urls_seen.add(request.url)
 
     def log(self, request, spider):
         # remove slice item in redis slice db, because it no longer to use

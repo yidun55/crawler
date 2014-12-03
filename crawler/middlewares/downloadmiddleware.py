@@ -62,7 +62,7 @@ class DownloadMiddleware(object):
             return Response(url=request.url, request=request, status=900)
         else:
             try:
-                data["msg"] = exception.message
+                data["msg"] = str(exception.message)
             except:
                 data["msg"] = "unknow"
             self.rd.zadd("log:httperror:unknow", json.dumps(data), time.time())
