@@ -7,7 +7,7 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 # USER_AGENT = 'crawler (+http://www.yourdomain.com)'
 USER_AGENT = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/28.0.1500.71 Chrome/28.0.1500.71 Safari/537.36"
 
-ITEM_PIPELINES = ['crawler.pipelines.CrawlerPipeline', ]
+ITEM_PIPELINES = {'crawler.pipelines.CrawlerPipeline': 100, }
 
 SCHEDULER_DOMAIN_CLASS = "crawler.lib.models.Domain"
 SCHEDULER_FLOW_CLASS = "crawler.lib.models.Flow"
@@ -27,9 +27,6 @@ EXTENSIONS = {
     "crawler.extensions.pushworker.PushWorkerExtension": 543
 }
 SCHEDULER = "crawler.extensions.scheduler.Scheduler"
-
-# Fingerprint url expire time
-FP_EXPIRE = 90 * 24 * 3600
 
 FURTHER_REQUEST_MODULE = "crawler.spiders.further_request"
 
