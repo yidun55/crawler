@@ -26,8 +26,8 @@ EXTENSIONS = {
     "crawler.extensions.scheduler_ext.SchedulerExtension": 500,
     "crawler.extensions.pushworker.PushWorkerExtension": 543
 }
-SCHEDULER = "crawler.extensions.scheduler.Scheduler"
 
+SCHEDULER = "crawler.extensions.scheduler.Scheduler"
 FURTHER_REQUEST_MODULE = "crawler.spiders.further_request"
 
 # Redis config

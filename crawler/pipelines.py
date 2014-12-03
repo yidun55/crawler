@@ -1,11 +1,9 @@
 # coding: utf-8
-import datetime
 import json
-
-#import pyreBloom
-from scrapy.exceptions import DropItem
+import datetime
 
 import redis
+from scrapy.exceptions import DropItem
 
 
 class CrawlerPipeline(object):
@@ -13,8 +11,6 @@ class CrawlerPipeline(object):
         self.settings = settings
         host = settings.get("REDIS_HOST")
         port = settings.get("REDIS_PORT")
-        # BloomFilter
-        #self.urls_seen = pyreBloom.pyreBloom("bloomfilter", 100000000, 0.001)
         slice_db = settings.get("SLICE_REDIS_DB")
         self.slice_rd = redis.Redis(host, port, slice_db)
 
@@ -37,8 +33,5 @@ class CrawlerPipeline(object):
         # create time/updated time
         full_item["created"] = datetime.datetime.now()
         full_item["updated"] = full_item["created"]
-
-        # save fingerprint to redis
-        #self.urls_seen.add(full_item["url"])
 
         return full_item

@@ -22,14 +22,15 @@ class SuperSpider(CrawlSpider):
     def __init__(self, *a, **kw):
         super(SuperSpider, self).__init__(*a, **kw)
 
-        self.rd = redis.Redis(settings.get("REDIS_HOST"), settings.get("REDIS_PORT"),
+        self.rd = redis.Redis(settings.get("REDIS_HOST"),
+                              settings.get("REDIS_PORT"),
                               db=settings.get("MAIN_REDIS_DB"))
 
         domain = settings.get("DOMAIN")
         self.domain = Domain(self.rd, domain)
         self.rule = Rule(self.rd, domain)
-        settings.overrides['DOWNLOAD_DELAY'] = float(self.domain["download_delay"])
-        settings.overrides['CONCURRENT_REQUESTS'] = int(self.domain["concurrent_requests"])
+        settings.set('DOWNLOAD_DELAY', float(self.domain["download_delay"]))
+        settings.set('CONCURRENT_REQUESTS', int(self.domain["concurrent_requests"]))
 
     def _get_realurl(self, response, url):
         if url.startswith("http://"):
