@@ -1,4 +1,6 @@
 # coding:utf-8
+import os
+import sys
 import time
 import json
 
@@ -6,6 +8,10 @@ import redis
 import pymongo
 import pyreBloom
 from scrapy import signals
+
+base = os.path.realpath(os.path.join(os.path.dirname(__file__), 'processing'))
+sys.path.append(base)
+from processing.process import emit
 
 
 class PushWorkerExtension(object):
@@ -45,6 +51,7 @@ class PushWorkerExtension(object):
         }
         self.rd.zadd("log:scraped", json.dumps(ldata), time.time())
 
-        self.db.car_info.save(data)
+        self.db.car_info.update({'url': data['url']}, data, upsert=True)
         self.urls_seen.add(data['url'])
+        emit(data)
         spider.log("Available Item send to worker, %s" % str(item))
