@@ -1,17 +1,17 @@
-#coding: utf-8
-import time
+# coding: utf-8
 import json
 
 import redis
 
+
 class Model(dict):
     _category = "default"
-    
+
     def __init__(self, rd, name):
         self.name = name
         self.hash_key = ":".join((self._category, name))
         self.rd = rd
-        
+
         _data = self.rd.hgetall(self.hash_key)
         _d = _data.copy()
         for _k, _v in _data.items():
@@ -19,16 +19,16 @@ class Model(dict):
                 _value = json.loads(_v)
             except:
                 continue
-            if isinstance(json.loads(_v), (list, dict)):
-                _d[_k] = json.loads(_v)
+            if isinstance(_value, (list, dict)):
+                _d[_k] = _value
         dict.__init__(self, **_d)
 
     @classmethod
     def from_settings(cls, name, settings):
-        rd = redis.Redis(host=settings.get("REDIS_HOST"), 
+        rd = redis.Redis(host=settings.get("REDIS_HOST"),
                          port=settings.get("REDIS_PORT"))
         return cls(rd, name)
-        
+
     def __setitem__(self, name, value):
         v = value
         if isinstance(value, (list, dict)):
@@ -45,10 +45,10 @@ class Model(dict):
             return dict.__getitem__(self, name)
         else:
             return rvalue
-        
+
     def __iter__(self):
         return iter(self.rd.hkeys(self.hash_key))
-    
+
     def __delitem__(self, key):
         self.rd.hdel(self.hash_key, key)
         dict.__delitem__(self, key)
@@ -60,7 +60,7 @@ class Model(dict):
         if kwargs:
             for k, v in kwargs.items():
                 self[k] = v
-                
+
     def incr(self, key, interval=1):
         self[key] = self.rd.hincrby(self.hash_key, key, interval)
         return self[key]
@@ -78,6 +78,7 @@ class Model(dict):
 
             if tag:
                 yield obj
+
 
 class Queue(object):
     def __init__(self, rd, key, method="FIFO"):
@@ -114,15 +115,16 @@ class Queue(object):
     def q_flush(self):
         self.rd.delete(self.queue_key)
 
+
 class Flow(Model, Queue):
     _category = 'flow'
 
     def __init__(self, rd, name):
         Model.__init__(self, rd, name)
         Queue.__init__(self, rd, name)
-    
+
     def reschedule(self):
-        if self.has_key('start_time'):
+        if "start_time" in self.has_key:
             del self['start_time']
         self['state'] = 'stopped'
         self.q_flush()
@@ -146,13 +148,14 @@ class Flow(Model, Queue):
         for f in flows:
             f.reset()
 
+
 class Domain(Model, Queue):
     _category = 'spider'
 
     def __init__(self, rd, name):
         Model.__init__(self, rd, name)
         Queue.__init__(self, rd, name)
-    
+
     def flows(self):
         return Flow.filter(self.rd, domain=self.name)
 
@@ -163,9 +166,9 @@ class Domain(Model, Queue):
             s.reset()
 
     def reset(self):
-        #rd.delete(self.hash_key)
         self['scheduled'] = 0
         self.q_flush()
-    
+
+
 class Rule(Model):
     _category = "rule"

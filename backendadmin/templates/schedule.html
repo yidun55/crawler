@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spider Scheduler</title>
+<link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/bootstrap-responsive.css') }}" rel="stylesheet" media="screen">
+</head>
+<body>
+<div class="navbar navbar-inverse">
+<div class="navbar-inner">
+<div class="container">
+  <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+  <span class="icon-bar"></span>
+  <span class="icon-bar"></span>
+  <span class="icon-bar"></span>
+  <span class="icon-bar"></span>
+  </button>
+  <a class="brand" href="/">Backend Admin</a>
+<div class="nav-collapse collapse">
+  <ul class="nav">
+    <li class="active">
+    <a href="/#">Dashboard</a>
+    </li>
+    <li class="">
+    <a href="/report">Statistics</a>
+    </li>
+    <li class="">
+    <a href="/processer">Processer</a>
+    </li>
+    <li class="">
+    <a href="/chart">Chart</a>
+    </li>
+  </ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="container">
+<div class="row-fluid">
+  <div class="span12">
+    <div class="page-header well well-small">
+      <h3>Domain list (urllib & queue) <small>Total urllib: <span id="fcount"></span>, Total request queue: <span id="dcount"></span></small></h3>
+      <div><input id="filter" type="text" class="search-query" placeholder="filter"></div>
+    </div>
+    <table class="table table-hover" id="main">
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Key</th>
+          <th>Quantity</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      {% set dcount = 0 %}
+      {% set fcount = 0 %}
+      {% for domain in domains %}
+      {% set dcount = dcount + domain.q_len() %}
+      <tbody id="{{ domain.name }}">
+        <tr>
+          <td><b>{{ domain.name }}<b></td>
+          <td><b>{{ domain.queue_key }}</b></td>
+          <td>{{ format(domain.q_len(), ',') }}</td>
+          <td><a class="btn btn-danger btn-mini res" href="/reschedule?domain={{ domain.name }}" title="Reschedule all flows belongs this domain."><i class="icon-repeat icon-white"></i> restart schedule(domain)</a></td>
+        </tr>
+        {% for flow in domain.flows() %}
+        {% set fcount = fcount + flow.q_len() %}
+        <tr>
+	  <td></td>
+	  <td><span>{{ flow.name }}</span></td>
+	  <td>{{ format(flow.q_len(), ',') }}</td>
+	  <td><a class="btn btn-info btn-mini res" href="/reschedule?flow={{ flow.name }}" title="Reschedule this flow."><i class="icon-repeat icon-white"></i> restart schedule</a></td>
+        </tr>
+        {% end %}
+      </tbody>
+      {% end %}
+    </table>
+  </div>
+</div>
+<address></address>
+<p class="muted pull-right"><!-- hhmts start -->Last modified: Fri Aug 16 17:11:12 CST 2013 <!-- hhmts end --></p>
+</div>
+</body>
+</html>
+<script src="{{ static_url('js/jquery.min.js') }}"></script>
+<script src="{{ static_url('js/bootstrap.min.js') }}"></script>

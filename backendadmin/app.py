@@ -11,6 +11,7 @@ from collections import defaultdict
 from StringIO import StringIO
 
 import xlwt
+import redis
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
@@ -21,12 +22,14 @@ from tornado.escape import json_encode, json_decode
 from torndb import Connection
 
 import settings
+from crawler.lib.models import Domain
 
 
 class MyApplication(Application):
     def __init__(self):
         handlers = [
             (r"/", IndexHandler),
+            (r"/schedule", ScheduleHandler),
             (r"/recently", RecentlyViewHandler),
             (r"/overview", OverViewHandler),
             (r"/domains", DomainsViewHandler),
@@ -42,6 +45,7 @@ class MyApplication(Application):
         )
         Application.__init__(self, handlers, **config)
 
+        self.rd_main = redis.Redis(settings.REDIS_HOST, settings.REDIS_PORT)
         self.db = Connection(
             host=settings.MYSQL_HOST, database=settings.MYSQL_DB,
             user=settings.MYSQL_USER, password=settings.MYSQL_PASS)
@@ -56,6 +60,11 @@ class BaseHandler(RequestHandler):
 class IndexHandler(BaseHandler):
     def get(self):
         self.redirect("/recently")
+
+
+class ScheduleHandler(BaseHandler):
+    def get(self):
+        self.render('schedule.html', domains=Domain.filter(self.rd_main))
 
 
 class RecentlyViewHandler(BaseHandler):
