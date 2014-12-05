@@ -58,6 +58,10 @@ class BaseHandler(RequestHandler):
     def db(self):
         return self.application.db
 
+    @property
+    def rdb(self):
+        return self.application.rd_main
+
 
 class IndexHandler(BaseHandler):
     def get(self):
@@ -66,7 +70,7 @@ class IndexHandler(BaseHandler):
 
 class ScheduleHandler(BaseHandler):
     def get(self):
-        self.render('schedule.html', domains=Domain.filter(self.rd_main))
+        self.render('schedule.html', domains=Domain.filter(self.rdb))
 
 
 class RecentlyViewHandler(BaseHandler):
