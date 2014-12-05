@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title id='Description'>Data Adapter bound to XML data.</title>
+    <script src="{{ static_url('js/jquery-1.9.1.min.js') }}"></script>
+    <script src="{{ static_url('js/jquery.jeditable.js') }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.edit').editable('/test',{
+                    indicator : 'Saving...',
+                    tooltip   : 'Click to edit...'
+                }
+            );
+        $('.edit_area').editable('/test', { 
+             type      : 'textarea',
+             indicator : '<img src="{{ static_url('img/indicator.gif') }}">',
+             tooltip   : 'Click to edit...'
+             });
+        });
+    </script>
+</head>
+<body class='default'>
+<div class="edit" id="div_1">Dolor</div>
+<div class="edit_area" id="div_2">Lorem ipsum dolor sit amet, consectetuer 
+adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
+magna aliquam erat volutpat.</div>
+</body>
+</html>

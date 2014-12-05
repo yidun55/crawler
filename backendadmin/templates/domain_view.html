@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spider data report</title>
+<link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/bootstrap-responsive.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/datepicker.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/my.css') }}" rel="stylesheet" media="screen">
+</head>
+<body>
+<div class="navbar">
+<div class="navbar-inner">
+<div class="nav-collapse collapse">
+  <ul class="nav nav-tabs">
+    <li><a href="/recently">昨日概览</a></li>
+    <li><a href="/overview">车源抓取情况</a></li>
+    <li class="active"><a href="#">网站分布情况</a></li>
+    <li><a href="/details">网站详情</a></li>
+  </ul>
+</div>
+</div>
+</div>
+
+<div class="container">
+<div class="row-fluid">
+<div class="span12">
+<div class="page-header">
+<div class="row-fluid">
+<div class="span8">
+<div class="row-fluid">
+<form id="fm" method="get" action="/domains">
+<div class="span4">
+  选择日期：
+  <input type="text" id="dp4" name="date" class="datepicker input-small" data-date="{{ datas['date'].strftime('%Y-%m-%d') }}" value="{{ datas['date'].strftime('%Y-%m-%d') }}" data-date-format="yyyy-mm-dd" />
+</div>
+<div class="span4">
+  <button id="submit" class="btn btn-primary">查询<i class="icon-search"></i></button>
+</div>
+</form>
+<div class="span4"></div>
+</div><!-- end of row-fluid -->
+</div><!-- end of span8 -->
+<div class="span4"><a href="/domains?date={{ datas['date'].strftime('%Y-%m-%d') }}&export=xls" class="btn pull-right">下载报表<i class="icon-download-alt"></i></a></div>
+</div><!-- end of row-fluid -->
+</div>
+
+<table class="table table-hover table-bordered">
+  <thead>
+    <tr>
+      <th>NO.</th>
+      <th>网站名称</th>
+      <th>网站域名</th>
+      <th>历史车源总量</th>
+      <th>在线车源总量</th>
+      <th>新增抓取车源总量</th>
+      <th>重复车源总量</th>
+      <th>无效车源总量</th>
+      <th>新增有效车源总量</th>
+      <th>状态</th>
+      <th>操作</th>
+      <th>备注异常</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set count = 1 %}
+    {% for data in datas["data"] %}
+    <tr>
+      <td>{{ count }}</td>
+      <td>{{ data["domain_name"] }}</td>
+      <td><a href="{{ data["domain_url"] }}" target="_blank">{{ data["domain"] }}</a></td>
+      <td>{{ data.get("old_total") or 0 }}</td>
+      <td>{{ data.get("cur_total") or 0 }}</td>
+      <td>{{ data.get("scraped") or 0 }}</td>
+      <td>{{ data.get("duplicated") or 0 }}</td>
+      <td>{{ data.get("day_overdue") or 0 }}</td>
+      <td>{{ data.get("day_available") or 0 }}</td>
+      <td>{{ data["status"] }}</td>
+      <td><a href="/details?domain={{ data["domain"] }}">查看详情</a></td>
+      <td class="editable"><font color="red" class="editable" domain="{{ data["domain"] }}">{{ data.get("description") or "" }}</font></td>
+    </tr>
+    {% set count += 1 %}
+    {% end %}
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+</body>
+</html>
+<script src="{{ static_url('js/jquery.min.js') }}"></script>
+<script src="{{ static_url('js/bootstrap.min.js') }}"></script>
+<script src="{{ static_url('js/bootstrap-datepicker.js') }}"></script>
+<script src="{{ static_url('js/jquery.jeditable.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('td.editable').click(function(event) {
+            $(this).find('font.editable').click();
+        });
+        $('font.editable').editable('/domains', {
+             type      : 'textarea',
+             name      : 'content', 
+             submitdata: function(value, settings) {
+                 return {domain: $(this).attr("domain"),
+                         date: '{{ datas["date"].strftime("%Y%m%d") }}'};
+             }, 
+             rows      : 3,
+             cols      : 5,
+             placeholder   : '',
+             indicator : '<img src="{{ static_url('img/indicator.gif') }}">', 
+             onblur    : 'submit',
+             });
+        var startDate = new Date($("#dp4").attr("value"));
+        // Date picker control
+        $('#dp4').datepicker()
+            .on('changeDate', function(ev){
+               startDate = new Date(ev.date);
+               $('#dp4').datepicker('hide');
+            }
+        );
+        $("#submit").click(
+            function(event) {
+                $("#fm").submit();
+            }
+        );
+        }
+    );
+</script>

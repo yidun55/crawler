@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spider data report</title>
+<link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/bootstrap-responsive.css') }}" rel="stylesheet" media="screen">
+</head>
+<body>
+<div class="navbar navbar-inverse">
+<div class="navbar-inner">
+<div class="container">
+  <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+  <span class="icon-bar"></span>
+  <span class="icon-bar"></span>
+  <span class="icon-bar"></span>
+  <span class="icon-bar"></span>
+  </button>
+  <a class="brand" href="/">Backend Admin</a>
+<div class="nav-collapse collapse">
+  <ul class="nav">
+    <li class="">
+    <a href="/dash">Dashboard</a>
+    </li>
+    <li class="active">
+    <a href="#">Statistics</a>
+    </li>
+    <li class="">
+    <a href="/processer">Processer</a>
+    </li>
+    <li class="">
+    <a href="/chart">Chart</a>
+    </li>
+  </ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="container">
+<div class="row-fluid">
+  <div class="span12">
+<form method="get" action="/report">
+  <div class="page-header well well-small">
+    <h3>Domain list
+    <form method="get" action="/report">
+    <small class="pull-right">Date:
+    <select name="date" id="date">
+      {% for date in dates %}
+      <option value="{{ date['date_str'] }}" {{ 'selected' if cur_date == date['date_str'] else '' }}>{{ date['date_str'] }}</option>
+      {% end %}
+    </select>
+  </small>
+  </h3>
+  </form>
+  </div>
+  <table class="table table-hover table-bordered">
+    <thead>
+    <tr>
+      <th>Domain</th>
+      <th>Request</th>
+      <th>Response</th>
+      <th>lpage</th>
+      <th>dpage</th>
+        <th>UrlError</th>
+      <th>HttpError</th>
+        <th>null</th>
+        <th>crawled</th>
+        <th>extracted</th>
+        <th>subcrawl</th>
+      <th>Incomplete</th>
+        <th>notfound</th>
+      <th>Overdue</th>
+      <th>Duplicated</th>
+      <th>Append</th>
+      <th>Update</th>
+      <th>Exception</th>
+    </tr>
+    </thead>
+    {% set total_domains = 0 %}
+    {% set total_request = 0 %}
+    {% set total_response = 0 %}
+    {% set total_lpage = 0 %}
+    {% set total_dpage = 0 %}
+    {% set total_urlerror = 0 %}
+    {% set total_httperror = 0 %}
+      {% set total_null = 0 %}
+      {% set total_extracted = 0 %}
+      {% set total_crawled = 0 %}
+      {% set total_subcrawl = 0 %}
+    {% set total_incomplete = 0 %}
+      {% set total_notfound = 0 %}
+    {% set total_overdue = 0 %}
+    {% set total_duplicate = 0 %}
+    {% set total_append = 0 %}
+    {% set total_updated = 0 %}
+    {% set total_exceptions = 0 %}
+    {% for d in data %}
+    <tr>
+      <td>{{ d['domain_name'] }}</td>
+      <td>{{ format(d['request'], ',') }}</td>
+      <td>{{ format(d['response'], ',') }}</td>
+      <td>{{ format(d['lpage'], ',') }}</td>
+      <td>{{ format(d['dpage'], ',') }}</td>
+        <td>{{ format(d['urlerror'], ',') }}</td>
+      <td>{{ format(d['httperror'], ',') }}</td>
+        <td>{{ format(d['null'], ',') }}</td>
+        <td>{{ format(d['crawled'], ',') }}</td>
+        <td>{{ format(d['extracted'], ',') }}</td>
+        <td>{{ format(d['subcrawl'], ',') }}</td>
+      <td>{{ format(d['incomplete'], ',') }}</td>
+        <td>{{ format(d['notfound'], ',') }}</td>
+      <td>{{ format(d['overdue'], ',') }}</td>
+      <td>{{ format(d['duplicate'], ',') }}</td>
+      <td>{{ format(d['append'], ',') }}</td>
+      <td>{{ format(d['updated'], ',') }}</td>
+      <td>{{ format(d['exceptions'], ',') }}</td>
+      {% set total_domains = total_domains + 1 %}
+      {% set total_request = total_request + int(d['request']) %}
+      {% set total_response = total_response + int(d['response']) %}
+      {% set total_lpage = total_lpage + int(d['lpage']) %}
+      {% set total_dpage = total_dpage + int(d['dpage']) %}
+        {% set total_urlerror = total_urlerror + int(d['urlerror']) %}
+      {% set total_httperror = total_httperror + int(d['httperror']) %}
+        {% set total_null= total_null + int(d['null']) %}
+        {% set total_extracted = total_extracted + int(d['extracted']) %}
+        {% set total_crawled = total_crawled + int(d['crawled']) %}
+        {% set total_subcrawl = total_subcrawl + int(d['subcrawl']) %}
+      {% set total_incomplete = total_incomplete + int(d['incomplete']) %}
+        {% set total_notfound = total_notfound + int(d['notfound']) %}
+      {% set total_overdue = total_overdue + int(d['overdue']) %}
+      {% set total_duplicate = total_duplicate + int(d['duplicate']) %}
+      {% set total_append = total_append + int(d['append']) %}
+      {% set total_updated = total_updated + int(d['updated']) %}
+      {% set total_exceptions = total_exceptions + int(d['exceptions']) %}
+    </tr>
+    {% end %}
+    <tbody>
+      <tr>
+	<td><b>Total({{ total_domains }} domains)</b></td>
+	<td><b>{{ format(total_request, ',') }}</b></td>
+	<td><b>{{ format(total_response, ',') }}</b></td>
+    <td><b>{{ format(total_lpage, ',') }}</b></td>
+    <td><b>{{ format(total_dpage, ',') }}</b></td>
+          <td><b>{{ format(total_urlerror, ',') }}</b></td>
+	<td><b>{{ format(total_httperror, ',') }}</b></td>
+          <td><b>{{ format(total_null, ',') }}</b></td>
+          <td><b>{{ format(total_crawled, ',') }}</b></td>
+          <td><b>{{ format(total_extracted, ',') }}</b></td>
+          <td><b>{{ format(total_subcrawl, ',') }}</b></td>
+	<td><b>{{ format(total_incomplete, ',') }}</b></td>
+          <td><b>{{ format(total_notfound, ',') }}</b></td>
+	<td><b>{{ format(total_overdue, ',') }}</b></td>
+	<td><b>{{ format(total_duplicate, ',') }}</b></td>
+	<td><b>{{ format(total_append, ',') }}</b></td>
+	<td><b>{{ format(total_updated, ',') }}</b></td>
+	<td><b>{{ format(total_exceptions, ',') }}</b></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+<address></address>
+<p class="muted pull-right"><!-- hhmts start -->Last modified: Sat Apr 27 15:39:36 CST 2013 <!-- hhmts end --></p>
+</div>
+</body></html>
+<script src="{{ static_url("js/jquery.min.js") }}"></script>
+<script src="{{ static_url("js/bootstrap.min.js") }}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#date").change(function() {
+        $("form").submit();
+    });
+});  
+</script> 

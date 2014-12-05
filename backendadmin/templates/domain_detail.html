@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spider data report</title>
+<link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/bootstrap-responsive.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/datepicker.css') }}" rel="stylesheet" media="screen">
+<link href="{{ static_url('css/my.css') }}" rel="stylesheet" media="screen">
+</head>
+<body>
+<div class="navbar">
+<div class="navbar-inner">
+<div class="nav-collapse collapse">
+  <ul class="nav nav-tabs">
+    <li><a href="/recently">昨日概览</a></li>
+    <li><a href="/overview">车源抓取情况</a></li>
+    <li><a href="/domains">网站分布情况</a></li>
+    <li class="active"><a href="#">网站详情</a></li>
+  </ul>
+</div>
+</div>
+</div>
+
+<div class="container">
+<div class="row-fluid">
+<div class="span12">
+<div class="page-header">
+<div class="row-fluid">
+<div class="span8">
+<div class="row-fluid">
+<form id="fm" method="get" action="/details">
+<div class="span5">
+  选择日期：
+  <input type="text" id="dp4" name="start" class="datepicker input-small" data-date="{{ start_time }}" value="{{ start_time }}" data-date-format="yyyy-mm-dd" /> &nbsp;
+  - &nbsp;
+  <input type="text" id="dp5" name="end" class="datepicker input-small" data-date="{{ end_time }}" value="{{ end_time }}" data-date-format="yyyy-mm-dd" />
+</div>
+<div class="span4">
+  选择网站：
+  <select id="domain" name="domain" class="input-medium">
+    {% for domain in domains %}
+    <option value="{{ domain['domain'] }}" {{ "selected" if domain['domain'] == cur_domain else "" }}>{{ domain['domain'] }}</option>
+    {% end %}
+  </select>
+</div>
+<div class="span3">
+  <button id="submit" class="btn btn-primary">查询<i class="icon-search"></i></button>
+</div>
+</form>
+</div><!-- end of row-fluid -->
+</div><!-- end of span8 -->
+<div class="span4"><a href="/details?start={{ start_time }}&end={{ end_time }}&domain={{ cur_domain }}&export=xls" class="btn pull-right">下载报表<i class="icon-download-alt"></i></a></div>
+</div><!-- end of row-fluid -->
+</div>
+<table class="table table-hover table-bordered">
+  <thead>
+</tr>
+<th>日期</th>
+<th>历史车源总量</th>
+<th>在线车源总量</th>
+<th>新增抓取车源总量</th>
+<th>重复车源总量</th>
+<th>无效车源总量</th>
+<th>新增有效车源总量</th>
+<th>备注异常</th>
+</tr>
+</thead>
+{% for data, date in datas %}
+<tr>
+  <td>{{ date.strftime('%Y-%m-%d') }}</td>
+  <td>{{ data.get("old_total") or 0 }}</td>
+  <td>{{ data.get("cur_total") or 0 }}</td>
+  <td>{{ data.get("scraped") or 0 }}</td>
+  <td>{{ data.get("duplicated") or 0 }}</td>
+  <td>{{ data.get("ignored") or 0 }}</td>
+  <td>{{ data.get("append") or 0 }}</td>
+  <td><td><font color="red"></font></td></td>
+</tr>
+{% end %}
+</table>
+</div>
+</div>
+
+</div>
+</body>
+</html>
+<script src="{{ static_url('js/jquery.min.js') }}"></script>
+<script src="{{ static_url('js/bootstrap.min.js') }}"></script>
+<script src="{{ static_url('js/bootstrap-datepicker.js') }}"></script>
+<script src="{{ static_url('js/my.js') }}"></script>

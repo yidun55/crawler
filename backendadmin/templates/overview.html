@@ -1,0 +1,96 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Overview</title>
+<script src="{{ static_url('js/jquery-1.9.1.min.js') }}"></script>
+<script src="{{ static_url('js/bootstrap.min.js') }}"></script>
+<script src="{{ static_url('js/deps.js') }}"></script>
+<script src="{{ static_url('js/seajs/sea.js') }}"></script>
+
+</head>
+<body>
+<div id="chart" class="clearfix"></div>
+    <script type="text/template">
+      <div class="legend">
+      </div>
+      <div>
+        <div class="nav">
+        </div>
+        <div>
+          <div class="percentage">
+          </div>
+          <div class="stream">
+          </div>
+        </div>
+      </div>
+    </script>
+</body>
+</html>
+<script>
+    seajs.config({
+      alias: {
+        'DataV': '{{ static_url("js/datav.js") }}',
+        'Axis': '{{ static_url("js/charts/axis.js") }}',
+        'StreamAxis': '{{ static_url("js/charts/stream_axis.js") }}',
+        'Legend': '{{ static_url("js/charts/legend.js") }}',
+        'Navi': '{{ static_url("js/charts/navi.js") }}',
+        'Tip': '{{ static_url("js/charts/tip.js") }}',
+        'Percentage': '{{ static_url("js/charts/percentage.js") }}',
+        'HoverLine': '{{ static_url("js/charts/hover_line.js") }}',
+        'PathLabel': '{{ static_url("js/charts/path_label.js") }}',
+        'Cover': '{{ static_url("js/charts/cover.js") }}',
+        'Stream': '{{ static_url("js/charts/stream.js") }}',
+        'StreamComponent': '{{ static_url("js/components/stream.js") }}'
+      }
+    });
+
+    seajs.use(["StreamComponent", "DataV"], function (StreamComponent, DataV) {
+      DataV.changeTheme("theme0");
+      var component = new StreamComponent("chart", {"width": '1086', "height": "750","leftLegendWidth":"200","leftLegendHeight":"750"});
+      var total = 0;
+      
+      component.setOptions({
+        legendPosition: "left",
+        tipStyle: {
+          "textAlign": "left",
+          "border": "3px solid white",
+          "borderRadius": "5px",
+          "lineHeight": "140%"}, 
+        getContent: function (obj) {
+            var html = "Domain:" + obj[this.mapping.type];
+            html += "<br />" + $("#category", parent.document.body).val() + ":" + obj[this.mapping.value];
+            html += "<br />Total:" + Math.round(obj[this.mapping.value]/obj.rate);
+            html += "<br />Seq:" + obj.rank;
+            html += "<br />Percentage:" + (obj.rate * 100).toFixed(2) + "%";
+            return html;
+        },
+        getPathLabel: function (obj) {
+          return obj.type + ' ' + (obj.sum / obj.total * 100).toFixed(2) + "%";
+        },
+        gradientColor: ['#61dd61', '#3737ee']
+        });
+
+      render(component);
+      $("#oFresh", parent.document.body).click(function(event) {
+          $("#chart").empty();
+          render(component);
+      });
+    });
+
+  var render = function(component) {
+          $.ajax({
+            dataType: "json",
+            url: "/chartdata",
+            data: { start: $("#odp4", parent.document.body).val(), end: $("#odp5", parent.document.body).val() },
+            success: function(json) {
+               component.setSource(json, {
+                 x: "date_str",
+                 value: $("#category", parent.document.body).val(),
+                 type: "domain_name"
+               });
+               component.render();
+            }
+          });
+      };
+</script>

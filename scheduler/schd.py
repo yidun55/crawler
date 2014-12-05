@@ -28,7 +28,7 @@ class FlowAggr:
         return flow['domain'] == self.domain.name and flow['priority'] == str(self.prio)
 
     def del_all_flows(self):
-        'remove all flows in the flow aggregator'
+        '''remove all flows in the flow aggregator'''
         for flow in self.get_flows():
             flow.reset()
 
