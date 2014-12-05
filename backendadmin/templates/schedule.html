@@ -71,7 +71,7 @@
 	  <td></td>
 	  <td><span>{{ flow.name }}</span></td>
 	  <td>{{ format(flow.q_len(), ',') }}</td>
-          <td>{{ flow.state }}</td>
+          <td>{{ flow['state'] }}</td>
 	  <td><a class="btn btn-info btn-mini res" href="/reschedule?flow={{ flow.name }}" title="Reschedule this flow."><i class="icon-repeat icon-white"></i> restart schedule</a></td>
         </tr>
         {% end %}
