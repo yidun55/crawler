@@ -49,6 +49,7 @@
           <th>Domain</th>
           <th>Key</th>
           <th>Quantity</th>
+          <th>Status</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -61,6 +62,7 @@
           <td><b>{{ domain.name }}<b></td>
           <td><b>{{ domain.queue_key }}</b></td>
           <td>{{ format(domain.q_len(), ',') }}</td>
+          <td></td>
           <td><a class="btn btn-danger btn-mini res" href="/reschedule?domain={{ domain.name }}" title="Reschedule all flows belongs this domain."><i class="icon-repeat icon-white"></i> restart schedule(domain)</a></td>
         </tr>
         {% for flow in domain.flows() %}
@@ -69,6 +71,7 @@
 	  <td></td>
 	  <td><span>{{ flow.name }}</span></td>
 	  <td>{{ format(flow.q_len(), ',') }}</td>
+          <td>{{ flow.state }}</td>
 	  <td><a class="btn btn-info btn-mini res" href="/reschedule?flow={{ flow.name }}" title="Reschedule this flow."><i class="icon-repeat icon-white"></i> restart schedule</a></td>
         </tr>
         {% end %}
