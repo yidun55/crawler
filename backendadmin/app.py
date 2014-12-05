@@ -45,7 +45,9 @@ class MyApplication(Application):
         )
         Application.__init__(self, handlers, **config)
 
-        self.rd_main = redis.Redis(settings.REDIS_HOST, settings.REDIS_PORT)
+        self.rd_main = redis.Redis(settings.REDIS_HOST,
+                                   settings.REDIS_PORT,
+                                   db=settings.REDIS_DB)
         self.db = Connection(
             host=settings.MYSQL_HOST, database=settings.MYSQL_DB,
             user=settings.MYSQL_USER, password=settings.MYSQL_PASS)
