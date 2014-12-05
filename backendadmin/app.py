@@ -22,7 +22,7 @@ from tornado.escape import json_encode, json_decode
 from torndb import Connection
 
 import settings
-from crawler.lib.models import Domain
+from models import Domain
 
 
 class MyApplication(Application):
