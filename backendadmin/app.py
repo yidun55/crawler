@@ -61,7 +61,7 @@ class BaseHandler(RequestHandler):
 
 class IndexHandler(BaseHandler):
     def get(self):
-        self.redirect("/recently")
+        self.redirect("/schedule")
 
 
 class ScheduleHandler(BaseHandler):
