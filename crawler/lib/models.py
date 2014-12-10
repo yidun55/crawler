@@ -4,15 +4,22 @@ import json
 import redis
 
 
+class RedisBindMetaClass(type):
+    def __new__(cls, name, extends, attrs):
+        attrs['redis'] = redis.Redis()
+        return super(RedisBindMetaClass, cls).__new__(cls, name, extends, attrs)
+
+__metaclass__ = RedisBindMetaClass
+
+
 class Model(dict):
     _category = "default"
 
-    def __init__(self, rd, name):
+    def __init__(self, name):
         self.name = name
         self.hash_key = ":".join((self._category, name))
-        self.rd = rd
 
-        _data = self.rd.hgetall(self.hash_key)
+        _data = self.redis.hgetall(self.hash_key)
         _d = _data.copy()
         for _k, _v in _data.items():
             try:
@@ -23,22 +30,16 @@ class Model(dict):
                 _d[_k] = _value
         dict.__init__(self, **_d)
 
-    @classmethod
-    def from_settings(cls, name, settings):
-        rd = redis.Redis(host=settings.get("REDIS_HOST"),
-                         port=settings.get("REDIS_PORT"))
-        return cls(rd, name)
-
     def __setitem__(self, name, value):
         v = value
         if isinstance(value, (list, dict)):
             value = json.dumps(value)
-        self.rd.hset(self.hash_key, name, value)
+        self.redis.hset(self.hash_key, name, value)
         dict.__setitem__(self, name, v)
 
     def __getitem__(self, name):
         dvalue = dict.__getitem__(self, name)
-        rvalue = self.rd.hget(self.hash_key, name).decode('utf-8')
+        rvalue = self.redis.hget(self.hash_key, name).decode('utf-8')
         if isinstance(dvalue, (list, dict)):
             if json.dumps(dvalue) != rvalue:
                 self[name] = json.loads(rvalue)
@@ -47,10 +48,10 @@ class Model(dict):
             return rvalue
 
     def __iter__(self):
-        return iter(self.rd.hkeys(self.hash_key))
+        return iter(self.redis.hkeys(self.hash_key))
 
     def __delitem__(self, key):
-        self.rd.hdel(self.hash_key, key)
+        self.redis.hdel(self.hash_key, key)
         dict.__delitem__(self, key)
 
     def update(self, ext, **kwargs):
@@ -62,14 +63,14 @@ class Model(dict):
                 self[k] = v
 
     def incr(self, key, interval=1):
-        self[key] = self.rd.hincrby(self.hash_key, key, interval)
+        self[key] = self.redis.hincrby(self.hash_key, key, interval)
         return self[key]
 
     @classmethod
-    def filter(cls, rd, **cluster):
-        keys = rd.keys("%s:*" % cls._category)
+    def filter(cls, **cluster):
+        keys = cls.redis.keys("%s:*" % cls._category)
         for key in keys:
-            obj = cls(rd, key.split("%s:" % cls._category)[1])
+            obj = cls(cls.redis, key.split("%s:" % cls._category)[1])
             tag = True
             for k, v in cluster.items():
                 if obj.get(k) != v:
@@ -81,17 +82,16 @@ class Model(dict):
 
 
 class Queue(object):
-    def __init__(self, rd, key, method="FIFO"):
+    def __init__(self, key, method="FIFO"):
         self.queue_key = "queue:%s" % key
         self.method = method
-        self.rd = rd
 
     def q_pop(self):
         req = None
         if self.method == 'LIFO':
-            req = self.rd.rpop(self.queue_key)
+            req = self.redis.rpop(self.queue_key)
         elif self.method == 'FIFO':
-            req = self.rd.lpop(self.queue_key)
+            req = self.redis.lpop(self.queue_key)
         else:
             raise Exception("Dont known how to get item FIFO/LIFO?")
 
@@ -104,24 +104,20 @@ class Queue(object):
             n -= 1
 
     def q_push(self, item):
-        self.rd.rpush(self.queue_key, item)
+        self.redis.rpush(self.queue_key, item)
 
     def q_len(self):
-        return int(self.rd.llen(self.queue_key))
+        return int(self.redis.llen(self.queue_key))
 
     def q_range(self, start=0, end=-1):
-        return self.rd.lrange(self.queue_key, start, end)
+        return self.redis.lrange(self.queue_key, start, end)
 
     def q_flush(self):
-        self.rd.delete(self.queue_key)
+        self.redis.delete(self.queue_key)
 
 
 class Flow(Model, Queue):
     _category = 'flow'
-
-    def __init__(self, rd, name):
-        Model.__init__(self, rd, name)
-        Queue.__init__(self, rd, name)
 
     def reschedule(self):
         if "start_time" in self.has_key:
@@ -134,17 +130,17 @@ class Flow(Model, Queue):
 
     @property
     def domain(self):
-        return Domain(self.rd, self['domain'])
+        return Domain(self.redis, self['domain'])
 
     @classmethod
-    def reschedule_all(cls, rd):
-        flows = cls.filter(rd)
+    def reschedule_all(cls):
+        flows = cls.filter()
         for f in flows:
             f.reschedule()
 
     @classmethod
-    def reset_all(cls, rd):
-        flows = cls.filter(rd)
+    def reset_all(cls):
+        flows = cls.filter()
         for f in flows:
             f.reset()
 
@@ -152,16 +148,12 @@ class Flow(Model, Queue):
 class Domain(Model, Queue):
     _category = 'spider'
 
-    def __init__(self, rd, name):
-        Model.__init__(self, rd, name)
-        Queue.__init__(self, rd, name)
-
     def flows(self):
-        return Flow.filter(self.rd, domain=self.name)
+        return Flow.filter(self.redis, domain=self.name)
 
     @classmethod
-    def reset_all(cls, rd):
-        spiders = cls.filter(rd)
+    def reset_all(cls):
+        spiders = cls.filter()
         for s in spiders:
             s.reset()
 
